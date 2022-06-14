@@ -139,16 +139,20 @@ on:
 
 {%- macro setup_ec2_linux() -%}
       - name: Checkout PyTorch
+        if: ${{ !env.ACT }}
         uses: pytorch/pytorch/.github/actions/checkout-pytorch@master
       - name: Setup Linux
+        if: ${{ !env.ACT }}
         uses: ./.github/actions/setup-linux
       - name: Chown workspace
+        if: ${{ !env.ACT }}
         run: |
           !{{ add_retry_to_env() }}
           retry docker pull "${ALPINE_IMAGE}"
           # Ensure the working directory gets chowned back to the current user
           docker run --pull=never --rm -v "$(pwd)":/v -w /v "${ALPINE_IMAGE}" chown -R "$(id -u):$(id -g)" .
       - name: Clean workspace
+        if: ${{ !env.ACT }}
         run: |
           rm -rf "${GITHUB_WORKSPACE}"
           mkdir "${GITHUB_WORKSPACE}"
@@ -160,6 +164,7 @@ on:
 
 {%- macro setup_rocm_linux() -%}
       - name: Clean workspace
+        if: ${{ !env.ACT }}
         run: |
           rm -rf "${GITHUB_WORKSPACE}"
           mkdir "${GITHUB_WORKSPACE}"
@@ -204,15 +209,15 @@ on:
         working-directory: !{{ pytorch_directory }}
 {%- endif %}
         # Always hold for active ssh sessions
-        if: always()
+        if: ${{ !env.ACT }}
         run: .github/scripts/wait_for_ssh_to_drain.sh
       - name: Chown workspace
-        if: always()
+        if: ${{ !env.ACT }}
         run: |
           # Ensure the working directory gets chowned back to the current user
           docker run --rm -v "$(pwd)":/v -w /v "${ALPINE_IMAGE}" chown -R "$(id -u):$(id -g)" .
       - name: Kill containers, clean up images
-        if: always()
+        if: ${{ !env.ACT }}
         run: |
           # ignore expansion of "docker ps -q" since it could be empty
           # shellcheck disable=SC2046
@@ -253,6 +258,7 @@ on:
           path: !{{ directory }}
       {%- endif %}
       - name: Clean !{{ 'PyTorch' if repository == "pytorch/pytorch" else repository }} checkout
+        if: ${{ !env.ACT }}
         run: |
           # Remove any artifacts from the previous checkouts
           git clean -fxd

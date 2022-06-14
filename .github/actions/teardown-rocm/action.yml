@@ -6,7 +6,7 @@ runs:
   using: composite
   steps:
     - name: Kill containers, clean up images
-      if: always()
+      if: ${{ !env.ACT }}
       shell: bash
       run: |
         # ignore expansion of "docker ps -q" since it could be empty
