@@ -19,6 +19,7 @@ runs:
       run: .github/scripts/wait_for_ssh_to_drain.sh
 
     - name: Kill containers, clean up images
+      if: ${{ !env.ACT }}
       shell: bash
       run: |
         # ignore expansion of "docker ps -q" since it could be empty
